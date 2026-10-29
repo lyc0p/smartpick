@@ -58,4 +58,12 @@ export const config = {
     enabled: false,
     postUrl: "",
   },
+
+  // IndexNow：零成本自动收录。构建时把站点 URL 推送给 Bing/必应等搜索引擎。
+  // key 为本站专属密钥（固定即可），密钥文件会随构建发布到站点根目录供搜索引擎验证。
+  // 关闭：enabled 设 false 即可。
+  indexNow: {
+    enabled: true,
+    key: "f9a3c1b7e2d4a6f8c0b1d2e3f4a5b6c7",
+  },
 };

@@ -41,20 +41,20 @@
 
 ```bash
 cd smartpick
-cp .env.example .env      # 按需填写 BASE_URL / AFF_ID / AD_CODE（不填也能跑，用占位）
+cp .env.example .env      # 按需填写 BASE_URL / AD_CODE（不填也能跑）
 npm run build             # 生成 dist/
 npm run serve             # 本地预览 http://localhost:4173
 ```
 
-不填 `AFF_ID` 时，联盟链接用 `PLACEHOLDER` 占位，页面照样完整可看；填上后自动替换。
+不填任何密钥也能完整运行：未配置真实推广链接时，购买按钮自动跳转到**京东搜索（按产品名）**，保证链接永远可用、不死链。
 
 ## 5. 部署（零成本，一次配置后自动）
 
 1. 在 GitHub 新建仓库 `smartpick`，把本目录推送上去。
 2. 仓库 **Settings → Pages → Build and deployment → Source 选 "GitHub Actions"**。
 3. 仓库 **Settings → Secrets and variables**：
-   - `Variables` 加 `BASE_URL=https://<你的用户名>.github.io/smartpick`
-   - `Secrets` 加 `AFF_ID`（联盟推广位 ID）、`AD_CODE`（AdSense 代码，可暂空）
+   - `Variables` 加 `BASE_URL=https://<你的用户名>.github.io/smartpick`（不填也行，代码已内置默认值）
+   - `Secrets` 加 `AD_CODE`（AdSense 代码，可暂空；`AFF_ID` 当前版本不再需要）
 4. 推送 `main` 分支，Actions 自动构建并发布。之后**每 6 小时自动重建**，无需你再管。
 5. 访问 `https://<你的用户名>.github.io/smartpick` 即上线。
 
@@ -63,14 +63,21 @@ npm run serve             # 本地预览 http://localhost:4173
 
 ## 6. 接入联盟（免费，需你实名）
 
-- **京东联盟** / **拼多多多多进宝** / **淘宝客**：官网免费注册 → 实名认证 → 创建推广位 → 拿到推广位 ID 填进 `AFF_ID`。
-- 商品数据目前用 `src/data/products.seed.json` 种子（保证离线可跑）。拿到联盟 API 的 `appkey` 后，在 `src/lib/fetch.js` 按注释接入真实商品/优惠券拉取，渲染层无需改。
+> ⚠️ 重要：京东/淘宝联盟的**网站类**推广位要求网站必须有工信部 ICP 备案；GitHub Pages 的 `github.io` 无法备案，因此**直接挂在站点上的京东链接带来的订单会被判无效**（赚不到佣金）。零成本下的现实变现路径见下。
+
+- **零成本可赚的佣金路径（社媒分享）**：在京东联盟申请**「导购媒体」**类推广位（微信/QQ/微博/抖音等，无需备案）→ 用联盟后台的“选品/转链”工具生成**带佣短链** → 你自己发到微信、群、小红书等。这部分订单计佣、且无需备案。
+- **想把链接直接放在本站点上赚钱**：日后花小钱买域名+备案后，把商品页的购买按钮换成你的真实带佣链接即可（在 `src/data/products.seed.json` 每个商品的 `affUrl` 字段填真实链接；已填则优先使用，未填则自动跳京东搜索）。
 - 商品页与卡片的购买按钮已带 `rel="sponsored nofollow"`，符合搜索引擎联盟链接规范。
+- 商品数据目前用 `src/data/products.seed.json` 种子（保证离线可跑）。拿到联盟 API 的 `appkey` 后，在 `src/lib/fetch.js` 按注释接入真实商品/优惠券拉取，渲染层无需改。
 
 ## 7. 接入广告（免费，需你实名）
 
 - **AdSense**：免费注册（GitHub Pages 海外域名即可，无需备案）→ 拿到广告单元 `<script>` → 整段填进 `AD_CODE` 密钥。
 - 全站广告位（首页/分类/商品/工具）会自动渲染；未配置时显示占位框，不影响功能。
+
+## 7.5 自动收录（已内置，无需你操作）
+
+构建时会把全站 URL 通过 **IndexNow** 自动推送给 Bing/必应等搜索引擎（构建日志里可见 `IndexNow 提交：202` 即成功）。密钥文件 `f9a3c1b7e2d4a6f8c0b1d2e3f4a5b6c7.txt` 随站点发布到根目录供验证。已在 `config.js` 的 `indexNow` 中默认开启，关闭只需设 `enabled:false`。
 
 ## 8. 必须你（本人）介入的环节
 
@@ -87,16 +94,13 @@ npm run serve             # 本地预览 http://localhost:4173
 
 ## 9. MVP 上线清单（勾选）
 
-- [ ] 注册 GitHub 账号，建 `smartpick` 仓库并推送代码
-- [ ] 仓库 Settings 开启 Pages（Source=GitHub Actions）
-- [ ] 配置 `BASE_URL` 变量
-- [ ] 注册京东联盟/拼多多，完成实名，拿到推广位 ID → 填 `AFF_ID`
-- [ ] （可选）注册 AdSense，拿到代码 → 填 `AD_CODE`
-- [ ] 本地 `npm run build` 验证 `dist/` 生成无误
-- [ ] 推送触发首次 Actions 构建并访问站点确认
+- [x] 注册 GitHub 账号，建 `smartpick` 仓库并推送代码
+- [x] 仓库 Settings 开启 Pages（Source=GitHub Actions）
+- [x] 站点已上线，IndexNow 自动收录已生效
+- [ ] （可选）注册 AdSense，拿到代码 → 填 `AD_CODE` 密钥（开启广告变现）
+- [ ] （变现关键）京东联盟申请「导购媒体」推广位，把选品带佣短链发到自己的微信/小红书等
 - [ ] 替换/扩充 `products.seed.json` 为真实想推的品类（建议 10–30 个商品起）
 - [ ] 在 `config.js` 把 `site.name` / `tagline` / `niche` 改成你的定位
-- [ ] 提交搜索引擎（Google Search Console / Bing Webmaster）加速收录
 - [ ] （可选）开启 `newsletter.enabled` 并填入免费邮件服务 POST 地址
 
 ## 10. 后续可选增强（仍零成本优先）

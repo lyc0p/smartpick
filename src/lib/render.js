@@ -41,7 +41,7 @@ function footer(baseUrl, adCode) {
   </footer>`;
 }
 
-function layout({ title, description, canonical, body, adCode, baseUrl }) {
+function layout({ title, description, canonical, body, adCode, baseUrl, jsonLd }) {
   return `<!doctype html>
 <html lang="${esc(config.site.lang)}">
 <head>
@@ -50,9 +50,11 @@ function layout({ title, description, canonical, body, adCode, baseUrl }) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${esc(canonical)}">
+<link rel="alternate" type="application/rss+xml" title="${esc(config.site.name)} RSS" href="${esc(baseUrl)}/feed.xml">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="website">
+${jsonLd ? `<script type="application/ld+json">${jsonLd}</script>` : ""}
 ${adCode && adCode.trim() ? adCode : ""}
 <style>
 :root{--bg:#fff;--fg:#1a1a1a;--mut:#6b7280;--bd:#e5e7eb;--acc:#2563eb;--acc2:#0ea5e9}
@@ -110,7 +112,7 @@ function productCard(p, baseUrl) {
     <div class="price">${esc(p.currency || "¥")}${esc(p.price)}</div>
     <div>${p.pros.slice(0, 2).map((x) => `<span class="tag">${esc(x)}</span>`).join("")}</div>
     <p class="muted">${esc(p.summary || "")}</p>
-    <a class="btn" rel="sponsored nofollow" target="_blank" href="${esc(p.affUrl)}">查看价格 / 购买</a>
+    <a class="btn" rel="sponsored nofollow" target="_blank" href="${esc(p.affUrl)}">去京东查看</a>
   </div>`;
 }
 
@@ -161,6 +163,13 @@ export function renderHome({ products, cats, adCode, baseUrl }) {
     body,
     adCode,
     baseUrl,
+    jsonLd: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: config.site.name,
+      url: `${baseUrl}/`,
+      description: config.site.description,
+    }),
   });
 }
 
@@ -173,7 +182,7 @@ export function renderCategory({ cat, items, adCode, baseUrl }) {
         <td>${esc(p.currency || "¥")}${esc(p.price)}</td>
         <td>${esc(p.rating)}</td>
         <td>${esc((p.summary || "").slice(0, 60))}</td>
-        <td><a class="btn" rel="sponsored nofollow" target="_blank" href="${esc(p.affUrl)}">购买</a></td>
+        <td><a class="btn" rel="sponsored nofollow" target="_blank" href="${esc(p.affUrl)}">去京东</a></td>
       </tr>`
     )
     .join("");
@@ -212,7 +221,7 @@ export function renderProduct({ p, adCode, baseUrl }) {
     <table><tbody>${specs}</tbody></table>
     <h2>优缺点</h2>
     <ul>${pros}${cons}</ul>
-    <p><a class="btn" rel="sponsored nofollow" target="_blank" href="${esc(p.affUrl)}">前往购买（联盟链接）</a></p>
+    <p><a class="btn" rel="sponsored nofollow" target="_blank" href="${esc(p.affUrl)}">去京东查看</a></p>
     ${adSlot(adCode, "商品底部")}
     <p class="muted"><a href="${baseUrl}/">← 返回首页</a></p>
   `;
@@ -223,6 +232,18 @@ export function renderProduct({ p, adCode, baseUrl }) {
     body,
     adCode,
     baseUrl,
+    jsonLd: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: p.name,
+      description: p.summary || "",
+      offers: {
+        "@type": "Offer",
+        price: p.price,
+        priceCurrency: (p.currency || "¥") === "¥" ? "CNY" : p.currency,
+        availability: "https://schema.org/InStock",
+      },
+    }),
   });
 }
 
@@ -276,13 +297,7 @@ export function renderTool({ adCode, baseUrl }) {
   });
 }
 
-export function renderSitemap({ products, cats, baseUrl }) {
-  const urls = [
-    `${baseUrl}/`,
-    `${baseUrl}/tool/`,
-    ...config.categories.map((c) => `${baseUrl}/cat/${c.slug}.html`),
-    ...products.map((p) => `${baseUrl}/p/${p.id}.html`),
-  ];
+export function renderSitemap({ urls }) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${esc(u)}</loc></url>`).join("\n")}
