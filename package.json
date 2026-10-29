@@ -1,0 +1,14 @@
+{
+  "name": "smartpick",
+  "version": "1.0.0",
+  "description": "自动化联盟导购 + 免费工具 + 长尾内容站（静态生成，可自动运转）",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "node serve.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

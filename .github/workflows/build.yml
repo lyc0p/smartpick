@@ -1,0 +1,47 @@
+name: build-and-deploy
+
+# 零成本自动化：push 或每 6 小时自动重建站点并发布到 GitHub Pages。
+# 不需要任何服务器；Actions 免费额度足够个人站点。
+on:
+  push:
+    branches: [main, master]
+  schedule:
+    - cron: "0 */6 * * *" # 每 6 小时拉取最新联盟数据并重建
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Build static site
+        run: node build.js
+        env:
+          BASE_URL: ${{ vars.BASE_URL }}      # 仓库 Settings > Secrets/Variables 里设置
+          AFF_ID: ${{ secrets.AFF_ID }}        # 你的联盟推广位 ID（私密）
+          AD_CODE: ${{ secrets.AD_CODE }}      # 广告代码（私密）
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
