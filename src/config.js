@@ -5,9 +5,9 @@ export const config = {
     name: "智选助手",
     tagline: "电子产品与家电选购比价指南",
     // 零成本方案：用 GitHub Pages 免费二级域名（无需购买域名、无需备案）。
-    // 把 <用户名> 换成你的 GitHub 用户名，仓库名为 smartpick 时地址即下方格式。
-    // 也可用环境变量 BASE_URL 覆盖，构建时注入。
-    baseUrl: "https://<用户名>.github.io/smartpick",
+    // 你的实际仓库名为 "-"，故上线地址为 https://lyc0p.github.io/-。
+    // 也可用环境变量 BASE_URL 覆盖，构建时注入（推荐在仓库 Secrets/Variables 里设）。
+    baseUrl: "https://lyc0p.github.io/-",
     lang: "zh-CN",
     description:
       "客观、可对比的电子产品与家电选购指南：参数对比、价格跟踪、观看距离计算，帮你少花冤枉钱。",
