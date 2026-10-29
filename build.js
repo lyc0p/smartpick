@@ -30,9 +30,14 @@ function resolveAffUrl(p) {
 }
 
 // IndexNow：构建时把全站 URL 推送给 Bing/必应等搜索引擎，加速收录（零成本、自动）。
+// 注意：GitHub Pages 项目页（*.github.io/仓库名 子路径）无法把验证文件放在域名根，
+// 搜索引擎所有权验证必然失败，IndexNow 实际无效，故在 github.io 下静默跳过。
+// 自有已备案域名（host 不是 github.io）时才真正生效。
 async function submitIndexNow(urls) {
   const key = config.indexNow?.key;
   if (!config.indexNow?.enabled || !key) return;
+  const host = new URL(baseUrl).host;
+  if (host.endsWith("github.io")) return;
   try {
     const host = new URL(baseUrl).host;
     const payload = JSON.stringify({

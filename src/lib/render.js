@@ -13,9 +13,11 @@ export function catSlug(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+// 广告位：填入 AD_CODE（百度联盟 / AdSense 代码）才展示；零成本无备案方案下
+// 广告变现基本不通，故未配置时完全不渲染，避免占位框误导用户。
 function adSlot(adCode, label) {
   if (adCode && adCode.trim()) return `<div class="ad">${adCode}</div>`;
-  return `<div class="ad ad--ph">广告位 · 配置 AD_CODE 后展示（${esc(label)}）</div>`;
+  return "";
 }
 
 function nav(baseUrl) {
